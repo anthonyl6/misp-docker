@@ -108,8 +108,6 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-      misp-modules:
-        condition: service_healthy
     healthcheck:
       test: curl -ks ${BASE_URL:-https://localhost}/users/heartbeat > /dev/null || exit 1
       interval: 2s
@@ -314,13 +312,6 @@ services:
         - MODULES_TAG=${MODULES_TAG:?Missing or outdated .env file, see README.md for instructions}
         - MODULES_COMMIT=${MODULES_COMMIT}
         - MODULES_FLAVOR=${MODULES_FLAVOR:-standard}
-    healthcheck:
-      test: "/bin/bash -c '</dev/tcp/localhost/6666'"
-      interval: 2s
-      timeout: 1s
-      retries: 3
-      start_period: 5s
-      start_interval: 5s
     volumes:
       # custom MISP modules are loaded at startup time
       - "./custom/action_mod/:/custom/action_mod/:Z"
