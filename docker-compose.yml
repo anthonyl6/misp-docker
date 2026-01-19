@@ -4,6 +4,9 @@ services:
   mail:
     image: ghcr.io/egos-tech/smtp:1.1.3
     restart: always
+    hostname: mail
+    networks:
+      - misp
     environment:
       # For use with Amazon SES relay
       - "SES_USER=${SES_USER}"
@@ -20,6 +23,9 @@ services:
   redis:
     image: valkey/valkey:7.2
     restart: always
+    hostname: redis
+    networks:
+      - misp
     command: |
       sh -c '
         if [ "$${ENABLE_REDIS_EMPTY_PASSWORD:-false}" = "true" ]; then
@@ -52,6 +58,9 @@ services:
     # We use MariaDB because it supports ARM and has the expected collations
     image: mariadb:10.11
     restart: always
+    hostname: db
+    networks:
+      - misp
     environment:
       - "MYSQL_USER=${MYSQL_USER:-misp}"
       - "MYSQL_PASSWORD=${MYSQL_PASSWORD:-example}"
@@ -81,6 +90,9 @@ services:
   misp-core:
     image: ghcr.io/misp/misp-docker/misp-core:${CORE_RUNNING_TAG:-latest}
     restart: always
+    hostname: core
+    networks:
+      - misp
     cap_add:
       - AUDIT_WRITE
     build:
@@ -306,6 +318,9 @@ services:
   misp-modules:
     image: ghcr.io/misp/misp-docker/misp-modules:${MODULES_RUNNING_TAG:-latest}
     restart: always
+    hostname: modules
+    networks:
+      - misp
     build:
       context: modules/.
       args:
@@ -323,6 +338,9 @@ services:
     profiles:
       - misp-guard
     restart: always
+    hostname: guard
+    networks:
+      - misp
     image: ghcr.io/misp/misp-docker/misp-guard:${GUARD_RUNNING_TAG:-latest}
     build:
       context: guard/.
@@ -348,3 +366,7 @@ services:
 volumes:
   mysql_data:
   cache_data:
+
+networks:
+  misp:
+    driver: bridge
